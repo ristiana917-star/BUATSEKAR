@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Ucapan Ulang Tahun</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ffd6eb, #ffe6f7);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      overflow: hidden;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      font-size: 1.3em;
+      border: none;
+      border-radius: 15px;
+      background-color: #ff99cc;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: #fff0f6;
+      padding: 30px;
+      border-radius: 25px;
+      text-align: center;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+      z-index: 1000;
+      transition: transform 0.5s ease-in-out;
+      width: 80%;
+      max-width: 500px;
+    }
+    .popup.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    h1 {
+      color: #ff4da6;
+      font-family: 'Pacifico', cursive;
+    }
+
+    /* Cake */
+    .cake {
+      position: relative;
+      margin: 30px auto;
+      width: 200px;
+      height: 150px;
+    }
+    .layer {
+      width: 200px;
+      height: 50px;
+      background: #ff99cc;
+      border-radius: 10px;
+      position: absolute;
+      left: 0;
+    }
+    .layer:nth-child(1) { bottom: 0; background: #ffb3d9; }
+    .layer:nth-child(2) { bottom: 50px; background: #ff99cc; }
+    .layer:nth-child(3) { bottom: 100px; background: #ff66b2; }
+    .candle {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 15px;
+      height: 40px;
+      background: #fff;
+      border-radius: 3px;
+    }
+    .flame {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 15px;
+      height: 15px;
+      background: radial-gradient(circle, #ff0 60%, transparent 70%);
+      border-radius: 50%;
+      animation: flicker 0.5s infinite alternate;
+    }
+    @keyframes flicker {
+      from { transform: translateX(-50%) scale(1); opacity: 1; }
+      to { transform: translateX(-50%) scale(1.2); opacity: 0.8; }
+    }
+
+    /* Karaoke lyrics */
+    .lyrics {
+      margin-top: 20px;
+      font-size: 1.3em;
+      color: #d63384;
+      min-height: 40px;
+      font-weight: bold;
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: #ff99cc;
+      top: -10px;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); }
+    }
+
+    /* Balloons */
+    .balloon {
+      position: fixed;
+      bottom: -150px;
+      width: 40px;
+      height: 60px;
+      background: pink;
+      border-radius: 50% 50% 50% 50%;
+      animation: rise 8s linear infinite;
+    }
+    @keyframes rise {
+      from { transform: translateY(0); }
+      to { transform: translateY(-120vh); }
+    }
+
+    /* Hearts */
+    .heart {
+      position: fixed;
+      bottom: -20px;
+      width: 20px;
+      height: 20px;
+      background: red;
+      transform: rotate(45deg);
+      animation: float 6s linear infinite;
+    }
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: red;
+      border-radius: 50%;
+    }
+    .heart::before { top: -10px; left: 0; }
+    .heart::after { left: -10px; top: 0; }
+    @keyframes float {
+      from { transform: translateY(0) rotate(45deg); opacity: 1; }
+      to { transform: translateY(-120vh) rotate(45deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <button class="btn" id="openBtn">Buka Hadiahnya Di Sini Kar</button>
+
+  <div class="popup" id="popup">
+    <h1>HAPPY BIRTHDAY SEKAR!!😝💖</h1>
+    <div class="cake">
+      <div class="layer"></div>
+      <div class="layer"></div>
+      <div class="layer"></div>
+      <div class="candle"></div>
+      <div class="flame"></div>
+    </div>
+    <div class="lyrics" id="lyrics"></div>
+  </div>
+
+  <audio id="music">
+    <source src="happy.mp4" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const btn = document.getElementById('openBtn');
+    const popup = document.getElementById('popup');
+    const music = document.getElementById('music');
+    const lyricsDiv = document.getElementById('lyrics');
+
+    const lyrics = [
+      { time:0, text:"oh, i don't wanna grow up"},
+      {time:3.10, text:"wish i'd never grown up, i could still be little"},
+      {time:7.70, text:"oh, i don't wanna grow up"},
+      {time:10.50, text:"wish i'd never grown up, it could still be simple"},
+      {time:15.37, text:"oh, darling don't you ever grow up"},
+      {time:17.90, text:"don't you ever grow up, just stay this little"},
+      {time:22.55, text:"oh, darling don't you ever grow up"},
+      {time:25.10, text:"don't you ever grow up, it could stay this simple"},
+      {time:31, text:"i won't let nobody hurt you! won't let no one break your heart..."}
+    ];
+
+    music.addEventListener("timeupdate", () => {
+  const current = music.currentTime;
+  for (let i = lyrics.length - 1; i >= 0; i--) {
+    if (current >= lyrics[i].time) {
+      lyricsDiv.textContent = lyrics[i].text;
+
+      if (i === lyrics.length - 1) {
+        lyricsDiv.style.fontFamily = "'Brush Script MT', cursive";
+        lyricsDiv.style.color = "#d63384";
+        lyricsDiv.style.fontSize = "2em";
+        lyricsDiv.style.textShadow = "2px 2px 4px rgba(0,0,0,0.3)";
+      } else {
+        // reset ke font default untuk lirik lainnya
+        lyricsDiv.style.fontFamily = "'Comic Sans MS', cursive, sans-serif";
+        lyricsDiv.style.color = "#d63384";
+        lyricsDiv.style.fontSize = "1.3em";
+      }
+      break;}}
+});
+
+    btn.addEventListener('click', () => {
+      popup.classList.add('show');
+      music.play();
+
+      // Confetti
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.left = Math.random() * window.innerWidth + 'px';
+        confetti.style.background = `hsl(${Math.random()*360}, 70%, 60%)`;
+        confetti.style.animationDuration = (2 + Math.random() * 3) + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 5000);
+      }
+
+      // Balloons
+      for (let i = 0; i < 10; i++) {
+        const balloon = document.createElement('div');
+        balloon.classList.add('balloon');
+        balloon.style.left = Math.random() * window.innerWidth + 'px';
+        balloon.style.background = `hsl(${Math.random()*360}, 70%, 70%)`;
+        balloon.style.animationDuration = (5 + Math.random() * 5) + 's';
+        document.body.appendChild(balloon);
+        setTimeout(() => balloon.remove(), 10000);
+      }
+
+      // Hearts
+      for (let i = 0; i < 10; i++) {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.style.left = Math.random() * window.innerWidth + 'px';
+        heart.style.background = `hsl(${Math.random()*360}, 70%, 60%)`;
+        heart.style.animationDuration = (4 + Math.random() * 4) + 's';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 8000);
+      }
+    });
+  </script>
+</body>
+</html>
